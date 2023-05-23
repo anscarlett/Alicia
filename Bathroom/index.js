@@ -10,7 +10,7 @@ Source: https://sketchfab.com/3d-models/lamborghini-urus-2650599973b649ddb4460ff
 Title: Lamborghini Urus
 */
 function Model(props) {
-  const { scene, nodes, materials } = useGLTF('/lambo.glb')
+  const { scene, nodes, materials } = useGLTF('/AliciasBathroom.glb')
   useLayoutEffect(() => {
     scene.traverse((obj) => obj.type === 'Mesh' && (obj.receiveShadow = obj.castShadow = true))
     /*Object.assign(nodes.wheel003_020_2_Chrome_0.material, { metalness: 0.9, roughness: 0.4, color: new THREE.Color('#020202') })
