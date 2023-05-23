@@ -6,7 +6,7 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 const textureLoader = new THREE.TextureLoader()
-const myTexture = textureLoader.load('coolTex.jpg')
+const myTexture = textureLoader.load('cliff_grey_porcelain_wall_and_floor_tiles_446845_5.webp')
 
 // Object
 const geometry = new THREE.BoxGeometry(1,1,1)
