@@ -1,79 +1,52 @@
-import {OrbitControls} from 'https://unpkg.com/three@0.127.0/examples/jsm/controls/OrbitControls.js'
-import * as THREE from 'https://unpkg.com/three@0.127.0/build/three.module.js';
-const canvas = document.querySelector('canvas.webgl')
+import * as THREE from 'three'
+import { Suspense, useLayoutEffect } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { useGLTF, MeshReflectorMaterial, Environment, Stage, PresentationControls } from '@react-three/drei'
 
-// Scene
-const scene = new THREE.Scene()
-
-const textureLoader = new THREE.TextureLoader()
-const myTexture = textureLoader.load('cliff_grey_porcelain_wall_and_floor_tiles_446845_5.webp')
-
-// Object
-const geometry = new THREE.BoxGeometry(1,1,1)
-const geometry2 = new THREE.DodecahedronGeometry(0.5,3)
-const material = new THREE.MeshBasicMaterial({
-    map: myTexture
-})
-const boxMesh = new THREE.Mesh(geometry,material)
-const sphereMesh = new THREE.Mesh(geometry2,material)
-scene.add(boxMesh)
-// scene.add(sphereMesh)
-boxMesh.position.x = 0
-boxMesh.position.y = 0.8
-sphereMesh.position.x = -1.6
-sphereMesh.position.y = 0.5
-geometry.center()
-// Sizes
-const sizes = {
-    width:window.innerWidth,
-    height:window.innerHeight
+/*
+Author: Steven Grey (https://sketchfab.com/Steven007)
+License: CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+Source: https://sketchfab.com/3d-models/lamborghini-urus-2650599973b649ddb4460ff6c03e4aa2
+Title: Lamborghini Urus
+*/
+function Model(props) {
+  const { scene, nodes, materials } = useGLTF('/lambo.glb')
+  useLayoutEffect(() => {
+    scene.traverse((obj) => obj.type === 'Mesh' && (obj.receiveShadow = obj.castShadow = true))
+    Object.assign(nodes.wheel003_020_2_Chrome_0.material, { metalness: 0.9, roughness: 0.4, color: new THREE.Color('#020202') })
+    Object.assign(materials.WhiteCar, { roughness: 0.0, metalness: 0.3, emissive: new THREE.Color('#500000'), envMapIntensity: 0.5 })
+  }, [scene, nodes, materials])
+  return <primitive object={scene} {...props} />
 }
 
-// Renderer gets updated each time window is resized
-window.addEventListener('resize',()=>{
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
-
-    camera.aspect = sizes.width/sizes.height
-    camera.updateProjectionMatrix()
-
-    renderer.setSize(sizes.width,sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio,2))
-    
-})
-
-// Camera
-const camera = new THREE.PerspectiveCamera(75,sizes.width/sizes.height,0.1,100)
-camera.position.z = 3
-scene.add(camera)
-
-// Controls
-const controls = new OrbitControls(camera, canvas)
-
-controls.enableZoom = false;
-controls.enableDamping = true
-
-const renderer = new THREE.WebGLRenderer({
-    canvas: canvas,
-    alpha: true,
-})
-renderer.setSize(sizes.width,sizes.height)
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2))
-
-const clock = new THREE.Clock()
-
-const tick = () => {
-    const elapsedTime = clock.getElapsedTime()
-    boxMesh.rotateX(30*0.0003)
-    boxMesh.rotateY(30*0.0003)
-    sphereMesh.rotateY(30*0.0003)
-    // mesh.position.y = Math.sin(elapsedTime) *0.1
-    boxMesh.position.z = Math.sin(elapsedTime) * 1
-
-    controls.update()
-    controls.enableDamping = true
-    renderer.render(scene,camera)
-    window.requestAnimationFrame(tick)
-};
-
-tick()
+export default function App() {
+  return (
+    <Canvas gl={() => new THREE.WebGLRenderer()} dpr={[1, 2]} shadows camera={{ fov: 45 }}>
+      <color attach="background" args={['#101010']} />
+      <fog attach="fog" args={['#101010', 10, 20]} />
+      <Suspense fallback={null}>
+        <Environment path="/cube" />
+        <PresentationControls speed={1.5} global zoom={0.7} polar={[-0.1, Math.PI / 4]}>
+          <Stage environment={null} intensity={1} contactShadow={false} shadowBias={-0.0015}>
+            <Model scale={0.01} />
+          </Stage>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[170, 170]} />
+            <MeshReflectorMaterial
+              blur={[300, 100]}
+              resolution={2048}
+              mixBlur={1}
+              mixStrength={40}
+              roughness={1}
+              depthScale={1.2}
+              minDepthThreshold={0.4}
+              maxDepthThreshold={1.4}
+              color="#101010"
+              metalness={0.5}
+            />
+          </mesh>
+        </PresentationControls>
+      </Suspense>
+    </Canvas>
+  )
+}
